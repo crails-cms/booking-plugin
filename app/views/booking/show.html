@@ -1,0 +1,66 @@
+#include <crails/i18n.hpp>
+#include <crails/cms/time.hpp>
+#include <crails/cms/routes.hpp>
+#include "app/models/bookable_event.hpp"
+#include "app/models/event_booking.hpp"
+
+const Crails::Cms::LocalRoute route = Crails::Cms::LocalRoute(vars);
+const BookableEvent& @model;
+const EventBooking& @booking;
+EventBooking::ValidationError @error = EventBooking::NoValidationError;
+unsigned int @remaining_space = 0;
+
+// END LINKING
+
+<div class="booking-show">
+  <div class="breadcrumbs">
+    <%= link(route(), i18n::t("booking.back-to-calendar")) %>
+  </div>
+
+  <div class="header">
+    <h1><%= model.get_title() %></h1>
+    <%= partial("booking/date_block", {{"date", model.get_date()}}) %>
+  </div>
+
+  <% if (model.is_complete()) do -%>
+    <div class="warning">
+      <%= i18n::t("booking.event-at-full-capacity") %>
+    </div>
+  <% end -%>
+
+  <% if (model.is_booking_closed()) do -%>
+    <div class="warning">
+      <%= i18n::t("booking.bookings-closed") %>
+    </div>
+  <% end else do -%>
+    <div class="info">
+      <%= i18n::t("booking.bookings-open-until", {{"deadline", time_to_string(model.get_booking_ends_at())}}) %>
+    </div>
+  <% end -%>
+
+  <div class="document">
+    <%= model.get_body() %>
+  </div>
+
+  <div id="booking">
+    <h4><%= i18n::t("Booking") %></h4>
+
+    <% switch (error) do %>
+    <% case EventBooking::WrongCaptcha: %>
+    <%= i18n::t("booking.wrong-captcha") %>
+    <% break %>
+    <% case EventBooking::NotEnoughSpace: %>
+    <% i18n::t("booking.not-enough-space", {{"space", std::to_string(remaining_space)}}) %>
+    <% break %>
+    <% default: break %>
+    <% end %>
+
+    <% if (booking.is_persistent()) do -%>
+      <div class="info">
+        <%= i18n::t("booking.successfull-booking") %>
+      </div>
+    <% end else do -%>
+      <%= partial("booking/form") %>
+    <% end -%>
+  </div>
+</div>

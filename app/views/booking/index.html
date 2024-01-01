@@ -1,0 +1,49 @@
+#include <crails/cms/time.hpp>
+#include <crails/cms/routes.hpp>
+#include "lib/bookable_event-odb.hxx"
+#include "lib/bookable_event_index_view-odb.hxx"
+
+const Crails::Cms::LocalRoute route = Crails::Cms::LocalRoute(vars);
+odb::result<BookableEventIndexView>& @models;
+std::pair<std::time_t, std::time_t> @range;
+std::string last_month;
+std::string current_month;
+std::vector<std::string> months;
+
+// END LINKING
+
+<ul class="event-list">
+  <% for (const auto& model : models) do -%>
+
+    <% current_month = time_to_string(model.date, "%B") %>
+    <% if (current_month != last_month) do -%>
+      <% last_month = current_month %>
+      <li class="month" id="month-<%= months.size() + 1 %>">
+        <%= current_month %>
+      </li>
+      <% months.push_back(current_month) %>
+    <% end -%>
+
+    <li class="event">
+      <%= link(route.make(std::string(model.slug))) yields %>
+        <%= partial("booking/date_block", {{"date", model.date}}) %>
+        <div data-role="description">
+          <h4><%= model.title %></h4>
+          <p><%= html_escape(model.description) %></p>
+        </div>
+        <div data-role="thumbnail">
+          <div class="thumbnail" style="background-image:url(<%= model.thumbnail %>)">
+          </div>
+        </div>
+      <% yields-end %>
+    </li>
+
+  <% end -%>
+</ul>
+
+<div id="event-list-month-picker">
+  <% for (unsigned int i = 0 ; i < months.size() ; ++i) do -%>
+    <%= link("#" + std::to_string(i + 1), months[i]) %>
+  <% end -%>
+</div>
+

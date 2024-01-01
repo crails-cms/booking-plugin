@@ -1,0 +1,17 @@
+#include <crails/cms/time.hpp>
+#include "app/models/bookable_event.hpp"
+
+std::time_t @date;
+
+// END LINKING
+
+<div class="date-block">
+  <span class="date-day">
+    <%= time_to_string(date, "%e") %>
+  </span>
+  <span class="date-short">
+    <%= time_to_string(date, "%B") %><br/>
+    <%= time_to_string(date, "%A") %><br/>
+    <%= time_to_string(date, "%Y") %>
+  </span>
+</div>

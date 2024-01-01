@@ -1,0 +1,51 @@
+#include <crails/i18n.hpp>
+#include <crails/html_form_builder.hpp>
+#include <crails/cms/time.hpp>
+#include <crails/cms/routes.hpp>
+#include "app/models/bookable_event.hpp"
+#include "app/models/event_booking.hpp"
+
+const Crails::Cms::LocalRoute route = Crails::Cms::LocalRoute(vars);
+const BookableEvent& @model;
+const EventBooking& @booking;
+std::string @captcha_form = "";
+Crails::FormBuilder<EventBooking> form = Crails::FormBuilder<EventBooking>(this, booking);
+
+// END LINKING
+
+<%= form_for(booking, route.make("/by-id/", model.get_id(), "/booking#booking")) yields %>
+  <div class="form-group">
+    <%= form.label_for("email") %>
+    <%= form.text_field("email", &EventBooking::get_email) %>
+  </div>
+
+  <div class="form-group">
+    <%= form.label_for("firstname") %>
+    <%= form.text_field("firstname", &EventBooking::get_firstname) %>
+  </div>
+
+  <div class="form-group">
+    <%= form.label_for("lastname") %>
+    <%= form.text_field("lastname", &EventBooking::get_lastname) %>
+  </div>
+
+  <!--
+  <div class="form-group">
+    <%= form.label_for("phone") %>
+    <%= form.text_field("phone", &EventBooking::get_phone) %>
+  </div>
+  -->
+
+  <div class="form-group">
+    <%= form.label_for("people_count") %>
+    <%= form.number_field("people_count", &EventBooking::get_people_count) %>
+  </div>
+
+  <div class="form-group">
+    <%= captcha_form %>
+  </div>
+
+  <%= tag("button", {{"type","submit"}}) yields %>
+    <%= i18n::t("bookings.book") %>
+  <% yields-end %>
+<% yields-end %>

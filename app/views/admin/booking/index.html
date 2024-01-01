@@ -1,0 +1,48 @@
+#include <crails/i18n.hpp>
+#include <crails/cms/routes.hpp>
+#include <crails/cms/time.hpp>
+#include <crails/cms/views/style.hpp>
+#include "app/models/bookable_event.hpp"
+#include "lib/plugin-odb.hxx"
+
+using namespace std;
+using namespace Crails::Cms;
+
+odb::result<BookableEventIndexView>& @models;
+const Style& style = Style::singleton::require();
+const char* date_format = "%H:%M:%S %d-%m-%y";
+const LocalRoute route = LocalRoute(vars);
+
+// END LINKING
+
+<div class="controls">
+  <div class="<%= style.button_group_classes() %>">
+    <%= link(route.make("new"), i18n::t("admin.new-event"), {{"class", style.button_classes()}}) %>
+  </div>
+</div>
+
+<table class="<%= style.table_classes() %> bookable-event-index">
+  <tr>
+    <th><%= i18n::t("admin.name") %></th>
+    <th><%= i18n::t("admin.date") %></th>
+    <th><%= i18n::t("admin.booking-ends-at") %></th>
+    <th><%= i18n::t("admin.people_count") %></th>
+    <th><%= i18n::t("admin.people_capacity") %></th>
+  </tr>
+  <% if (!models.size()) do -%>
+    <td colspan="5"><%= i18n::t("admin.empty-table") %></td>
+  <% end -%>
+  <% for (const auto& model : models) do -%>
+    <tr>
+      <td>
+        <%= link(route.make(model.id), model.title) %>
+      </td>
+      <td><%= time_to_string(model.date, date_format) %></td>
+      <td><%= time_to_string(model.booking_ends_at, date_format) %></td>
+      <td>
+        <%= link(route.make(model.id, "/bookings"), std::to_string(model.people_count)) %>
+      </td>
+      <td><%= model.people_capacity %></td>
+    </tr>
+  <% end -%>
+</table>

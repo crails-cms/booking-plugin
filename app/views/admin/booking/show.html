@@ -1,0 +1,77 @@
+#include <crails/i18n.hpp>
+#include <crails/html_form_builder.hpp>
+#include <crails/cms/views/style.hpp>
+#include <crails/cms/routes.hpp>
+#include <crails/cms/time.hpp>
+#include "app/models/bookable_event.hpp"
+#include <iostream>
+
+using namespace Crails::Cms;
+
+const Style& style = Style::singleton::require();
+const BookableEvent& @model;
+const LocalRoute route = LocalRoute(vars);
+Crails::FormBuilder<BookableEvent> form = Crails::FormBuilder<BookableEvent>(this, model);
+
+// END LINKING
+
+<%= form_for(model, route(), {{"style", style.form_classes() + "bookable-event-form"},{"id","main-form"}}) yields %>
+
+  <!-- Title -->
+  <%= style.form_group() yields %>
+    <%= form.label_for("title") %>
+    <%= form.text_field("title", &BookableEvent::get_title) %>
+  <% yields-end %>
+
+  <!-- Description -->
+  <%= style.form_group() yields %>
+    <%= form.label_for("description") %>
+    <%= form.text_area("description", &BookableEvent::get_description, {{"maxlength",std::to_string(Crails::Cms::Editable::description_length)}}) %>
+  <% yields-end %>
+
+  <!-- Thumbnail -->
+  <%= style.form_group(Crails::Cms::ClassList("thumbnail-form-group")) yields %>
+    <%= form.label_for("thumbnail") %>
+    <%= form.text_field("thumbnail", &BookableEvent::get_thumbnail_url) %>
+    <%= tag("button", {{"class",style.button_classes()}}) yields %>
+      <%= i18n::t("admin.image-library") %>
+    <% yields-end %>
+    <img />
+  <% yields-end %>
+
+  <!-- Capacity -->
+  <%= style.form_group() yields %>
+    <%= form.label_for("people_capacity") %>
+    <%= form.number_field("people_capacity", &BookableEvent::get_people_capacity) %>
+  <% yields-end %>
+
+  <!-- Date -->
+  <%= style.form_group() yields %>
+    <%= form.label_for("date") %>
+    <%= form.datetime_field("date", &BookableEvent::get_form_date) %>
+  <% yields-end %>
+
+  <%= style.form_group() yields %>
+    <%= form.label_for("duration") %>
+    <%= form.number_field("duration", &BookableEvent::get_duration) %>
+  <% yields-end %>
+
+  <!-- Booking ends -->
+  <%= style.form_group() yields %>
+    <%= form.label_for("booking_ends_at") %>
+    <%= form.datetime_field("booking_ends_at", &BookableEvent::get_form_booking_ends_at) %>
+  <% yields-end %>
+
+  <!-- Body -->
+  <%= form.text_area("body", &BookableEvent::get_body) %>
+<% yields-end %>
+
+<div class="<%= style.button_group_classes() %>">
+  <%= style.admin_submit_button("main-form") %>
+  <% if (model.is_persistent()) do %>
+    <%= style.admin_remove_button(*this, route.make(model.get_id())) %>
+    <%= link(route.make(model.get_id(), "/bookings"), i18n::t("admin.bookings"), {{"class",style.button_classes()}}) %>
+  <% end %>
+</div>
+
+<script>proudcmsAdminCKEditor("<%= form.scoped_name("body") %>");</script>
